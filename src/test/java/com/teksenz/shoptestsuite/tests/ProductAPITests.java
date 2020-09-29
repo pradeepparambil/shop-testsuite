@@ -3,11 +3,16 @@ package com.teksenz.shoptestsuite.tests;
 import com.teksenz.shoptestsuite.lib.TestBase;
 import com.teksenz.shoptestsuite.models.Product;
 import com.teksenz.shoptestsuite.services.ProductService;
+import io.restassured.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.testng.annotations.Test;
 
 import java.util.List;
+
+
+import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.containsString;
 
 
 @Slf4j
@@ -121,5 +126,30 @@ public class ProductAPITests extends TestBase {
                 .saveNewProduct(product,HttpStatus.SC_CREATED)
                 .setProductIdFor(product)
                 .findAllProducts(HttpStatus.SC_OK, List.of(product));
+    }
+
+    @Test
+    public void debugTest() {
+        Product product = Product.builder()
+                .name("LG 43\" Full HD LED TV - 43LF5100")
+                .description("The LG LF5100 Edge Lit LED TV has a " +
+                        "sleek and slim profile with the benefit " +
+                        "of bright and clear colour detail and energy efficiency.")
+                .price(600F)
+                .build();
+
+        given()
+//                .log(LogDetail.ALL)
+                .baseUri(baseUri)
+                .basePath(basePath)
+                .contentType(ContentType.JSON)
+                .body(product)
+                .log().all()
+        .when()
+                .post("/products")
+        .then().log().all()
+                .assertThat().statusCode(HttpStatus.SC_CREATED)
+                .assertThat().header("Location",containsString("/api/v1/products/"));
+
     }
 }

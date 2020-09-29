@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.http.HttpStatus;
+import org.testng.annotations.Test;
 
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +39,7 @@ public class ProductService extends ServiceBase {
                 .body(product)
                 .when()
                 .post("/products")
-                .then()
+                .then().log().all()
                 .assertThat().statusCode(expStatusCode)
                 .assertThat().header("Location",containsString("/api/v1/products/"))
                 .extract().header("Location");
@@ -50,7 +51,7 @@ public class ProductService extends ServiceBase {
         ExtractableResponse<Response> response = given().spec(requestSpecification)
                 .when()
                 .get("/products/"+uuid)
-                .then()
+                .then().log().all()
                 .assertThat().statusCode(expStatusCode)
                 .extract();
         if(expStatusCode == HttpStatus.SC_OK){
@@ -67,7 +68,7 @@ public class ProductService extends ServiceBase {
                 .pathParam("productId",uuid)
         .when()
                 .put("/products/{productId}")
-                .then()
+                .then().log().all()
                 .assertThat().statusCode(HttpStatus.SC_NO_CONTENT);
         return this;
     }
@@ -77,7 +78,7 @@ public class ProductService extends ServiceBase {
                 .pathParam("productId",uuid)
                 .when()
                 .delete("/products/{productId}")
-                .then()
+                .then().log().all()
                 .assertThat().statusCode(expStatusCode);
         return this;
 
@@ -87,7 +88,7 @@ public class ProductService extends ServiceBase {
         ExtractableResponse<Response> response = given().spec(requestSpecification)
                 .when()
                 .get("/products")
-                .then()
+                .then().log().all()
                 .assertThat().statusCode(expStatusCode)
                 .extract();
         if(expStatusCode == HttpStatus.SC_OK){
@@ -103,4 +104,7 @@ public class ProductService extends ServiceBase {
         product.setId(productUuid);
         return this;
     }
+
+
+
 }
