@@ -2,14 +2,17 @@ package com.teksenz.shoptestsuite.services;
 
 import com.teksenz.shoptestsuite.lib.ServiceBase;
 import com.teksenz.shoptestsuite.models.Product;
+import com.teksenz.shoptestsuite.models.UserInfo;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.http.HttpStatus;
+import org.apache.tools.ant.taskdefs.condition.Http;
 import org.testng.annotations.Test;
 
 import java.util.List;
@@ -32,24 +35,32 @@ public class ProductService extends ServiceBase {
         this.productUuid = productUuid;
     }
 
-    public ProductService saveNewProduct(Product product, int expStatusCode) {
+    public ProductService saveNewProduct(Product product, int expStatusCode, UserInfo userInfo) {
 
-        String location = given()
+        ValidatableResponse response = given()
                 .spec(requestSpecification)
+                .auth().basic(userInfo.getUsername(),userInfo.getPassword())
                 .body(product)
                 .when()
                 .post("/products")
                 .then().log().all()
-                .assertThat().statusCode(expStatusCode)
-                .assertThat().header("Location",containsString("/api/v1/products/"))
-                .extract().header("Location");
-        productUuid = UUID.fromString(location.substring("/api/v1/products/".length()));
+                .assertThat().statusCode(expStatusCode);
+
+        if(expStatusCode == HttpStatus.SC_CREATED){
+            String location = response.assertThat()
+                    .header("Location",containsString("/api/v1/products/"))
+                    .extract().header("Location");
+            productUuid = UUID.fromString(location.substring("/api/v1/products/".length()));
+        }
+
         return this;
 
     }
-    public ProductService findProductById(UUID uuid,int expStatusCode, Product expProduct) {
+
+    public ProductService findProductById(UUID uuid,int expStatusCode, Product expProduct, UserInfo userInfo) {
         ExtractableResponse<Response> response = given().spec(requestSpecification)
                 .when()
+                .auth().basic(userInfo.getUsername(),userInfo.getPassword())
                 .get("/products/"+uuid)
                 .then().log().all()
                 .assertThat().statusCode(expStatusCode)
@@ -62,8 +73,9 @@ public class ProductService extends ServiceBase {
         return this;
     }
 
-    public ProductService updateProduct(UUID uuid, Product product) {
+    public ProductService updateProduct(UUID uuid, Product product, int expStatusCode, UserInfo userInfo) {
         given().spec(requestSpecification)
+                .auth().basic(userInfo.getUsername(),userInfo.getPassword())
                 .body(product)
                 .pathParam("productId",uuid)
         .when()
@@ -73,8 +85,9 @@ public class ProductService extends ServiceBase {
         return this;
     }
 
-    public ProductService deleteProduct(UUID uuid, int expStatusCode) {
+    public ProductService deleteProduct(UUID uuid, int expStatusCode,UserInfo userInfo) {
         given().spec(requestSpecification)
+                .auth().basic(userInfo.getUsername(),userInfo.getPassword())
                 .pathParam("productId",uuid)
                 .when()
                 .delete("/products/{productId}")

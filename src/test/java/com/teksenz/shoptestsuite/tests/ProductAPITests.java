@@ -2,6 +2,7 @@ package com.teksenz.shoptestsuite.tests;
 
 import com.teksenz.shoptestsuite.lib.TestBase;
 import com.teksenz.shoptestsuite.models.Product;
+import com.teksenz.shoptestsuite.models.UserInfo;
 import com.teksenz.shoptestsuite.services.ProductService;
 import io.restassured.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
@@ -27,11 +28,38 @@ public class ProductAPITests extends TestBase {
                         "of bright and clear colour detail and energy efficiency.")
                 .price(600F)
                 .build();
+        UserInfo userInfo = UserInfo.builder()
+                .username("maria")
+                .password("maria123")
+                .build();
+
         ProductService
                 .builder()
                 .requestSpecification(requestSpecification)
                 .build()
-                .saveNewProduct(product,HttpStatus.SC_CREATED);
+                .saveNewProduct(product,HttpStatus.SC_CREATED,userInfo);
+
+    }
+
+    @Test(description = "Save a product as a user without permission")
+    public void validateSavingAProductNoPermission(){
+        Product product = Product.builder()
+                .name("LG 43\" Full HD LED TV - 43LF5100")
+                .description("The LG LF5100 Edge Lit LED TV has a " +
+                        "sleek and slim profile with the benefit " +
+                        "of bright and clear colour detail and energy efficiency.")
+                .price(600F)
+                .build();
+        UserInfo userInfo = UserInfo.builder()
+                .username("john")
+                .password("john123")
+                .build();
+
+        ProductService
+                .builder()
+                .requestSpecification(requestSpecification)
+                .build()
+                .saveNewProduct(product,HttpStatus.SC_FORBIDDEN,userInfo);
 
     }
 
@@ -46,15 +74,21 @@ public class ProductAPITests extends TestBase {
                 .price(600F)
                 .build();
 
+        UserInfo userInfo = UserInfo.builder()
+                .username("maria")
+                .password("maria123")
+                .build();
+
 
         ProductService productService = ProductService
                 .builder()
                 .requestSpecification(requestSpecification)
                 .build();
 
+
         productService
-                .saveNewProduct(product,HttpStatus.SC_CREATED)
-                .findProductById(productService.getProductUuid(),HttpStatus.SC_OK,product);
+                .saveNewProduct(product,HttpStatus.SC_CREATED,userInfo)
+                .findProductById(productService.getProductUuid(),HttpStatus.SC_OK,product, userInfo);
     }
     @Test
     public void validateUpdatingAProduct(){
@@ -64,6 +98,10 @@ public class ProductAPITests extends TestBase {
                         "sleek and slim profile with the benefit " +
                         "of bright and clear colour detail and energy efficiency.")
                 .price(600F)
+                .build();
+        UserInfo userInfo = UserInfo.builder()
+                .username("maria")
+                .password("maria123")
                 .build();
 
         Product productToUpdate = Product.builder()
@@ -80,10 +118,9 @@ public class ProductAPITests extends TestBase {
                 .build();
 
         productService
-                .saveNewProduct(product,HttpStatus.SC_CREATED)
-                .updateProduct(productService.getProductUuid(),productToUpdate)
-                .findProductById(productService.getProductUuid(),HttpStatus.SC_OK,productToUpdate);
-
+                .saveNewProduct(product,HttpStatus.SC_CREATED,userInfo)
+                .updateProduct(productService.getProductUuid(),productToUpdate, HttpStatus.SC_NO_CONTENT,userInfo)
+                .findProductById(productService.getProductUuid(),HttpStatus.SC_OK,productToUpdate,userInfo);
     }
     @Test
     public void validateDeleteProductById(){
@@ -94,6 +131,10 @@ public class ProductAPITests extends TestBase {
                         "of bright and clear colour detail and energy efficiency.")
                 .price(600F)
                 .build();
+        UserInfo userInfo = UserInfo.builder()
+                .username("maria")
+                .password("maria123")
+                .build();
 
 
         ProductService productService = ProductService
@@ -102,9 +143,9 @@ public class ProductAPITests extends TestBase {
                 .build();
 
         productService
-                .saveNewProduct(product,HttpStatus.SC_CREATED)
-                .deleteProduct(productService.getProductUuid(),HttpStatus.SC_NO_CONTENT)
-                .findProductById(productService.getProductUuid(), HttpStatus.SC_NOT_FOUND,null);
+                .saveNewProduct(product,HttpStatus.SC_CREATED,userInfo)
+                .deleteProduct(productService.getProductUuid(),HttpStatus.SC_NO_CONTENT,userInfo)
+                .findProductById(productService.getProductUuid(), HttpStatus.SC_NOT_FOUND,null,userInfo);
     }
     @Test
     public void validateFindAllProducts(){
@@ -115,6 +156,10 @@ public class ProductAPITests extends TestBase {
                         "of bright and clear colour detail and energy efficiency.")
                 .price(600F)
                 .build();
+        UserInfo userInfo = UserInfo.builder()
+                .username("maria")
+                .password("maria123")
+                .build();
 
 
         ProductService productService = ProductService
@@ -123,12 +168,12 @@ public class ProductAPITests extends TestBase {
                 .build();
 
         productService
-                .saveNewProduct(product,HttpStatus.SC_CREATED)
+                .saveNewProduct(product,HttpStatus.SC_CREATED,userInfo)
                 .setProductIdFor(product)
                 .findAllProducts(HttpStatus.SC_OK, List.of(product));
     }
 
-    @Test
+    @Test(enabled = false)
     public void debugTest() {
         Product product = Product.builder()
                 .name("LG 43\" Full HD LED TV - 43LF5100")
