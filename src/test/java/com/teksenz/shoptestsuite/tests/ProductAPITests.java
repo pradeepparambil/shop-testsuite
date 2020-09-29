@@ -182,7 +182,6 @@ public class ProductAPITests extends TestBase {
                         "of bright and clear colour detail and energy efficiency.")
                 .price(600F)
                 .build();
-
         given()
 //                .log(LogDetail.ALL)
                 .baseUri(baseUri)
