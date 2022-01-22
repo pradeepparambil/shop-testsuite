@@ -173,7 +173,7 @@ public class ProductAPITests extends TestBase {
                 .findAllProducts(HttpStatus.SC_OK, List.of(product));
     }
 
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void debugTest() {
         Product product = Product.builder()
                 .name("LG 43\" Full HD LED TV - 43LF5100")

@@ -17,7 +17,7 @@ import java.io.PrintStream;
 import static io.restassured.RestAssured.config;
 @Slf4j
 public class TestBase {
-    protected final String baseUri = "http://localhost:8080";
+    protected final String baseUri = "http://localhost:8090";
     protected final String basePath = "/api/v1";
     protected RequestSpecification requestSpecification;
     @BeforeSuite
